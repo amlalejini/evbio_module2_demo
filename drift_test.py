@@ -1,4 +1,6 @@
-import random, copy
+import random, copy, json
+import matplotlib.pyplot as plt
+
 
 class Agent(object):
     '''
@@ -61,35 +63,66 @@ def runsim(popSize, generations, numChallengers, scoreMutationRate, scoreMutatio
     # Return sim results
     return (aveScores, rareTraitCnt)
 
-
-
-
-
+def simple_get_line_color(i):
+    COLORS = ['r', 'b', 'g', 'c', 'm', 'y', 'k']
+    index = i % len(COLORS)
+    return COLORS[index]
 
 
 if __name__ == "__main__":
-    popSize = 1000
-    generations = 3000
-    scoreMutationRate = 0.05
-    scoreMutationRange = 0.025
-    rareTraitMutationRate = 0.0001
-    numChallengers = 1.0
-    conditions = [1, 2, 4, 8]
+    settings_file = "settings.json"
+    # Extract settings from settings file
+    with open(settings_file) as fp:
+        settings = json.load(fp)
 
-    conditionCnt = 5
-    testsPerCondition = 4
+    print("Loaded settings: " + str(settings))
+    popSize = settings["population_size"]
+    generations = settings["generations"]
+    scoreMutationRate = settings["score_mutation_rate"]
+    scoreMutationRange = settings["score_mutation_range"]
+    rareTraitMutationRate = settings["rare_trait_mutation_rate"]
+    conditions = settings["num_challenger_conditions"]
+    testsPerCondition = settings["tests_per_condition"]
 
     scoreData = []
     rareData = []
 
+    # Run each condition
     for condition in conditions:
+        # Run some number of trials per condition
         for i in range(0, testsPerCondition):
+            # Get number of challengers parameter
             numChallengers = condition
             print("=================")
             print("Condition:")
             print(" - Challenger Count: " + str(numChallengers))
             print(" - Generations: " + str(generations))
+            # Run the simulation
             output = runsim(popSize, generations, numChallengers, scoreMutationRate, scoreMutationRange, rareTraitMutationRate)
-            print("Other stats...")
+            print("Final avg score: " + str(output[0][-1]))
+            print("Final rareTraitCount: " + str(output[1][-1]))
+            # Store data from run
             scoreData.append(output[0])
             rareData.append(output[1])
+
+    # Plot!
+    for k in range(0, len(conditions)):
+        plt.figure(figsize = (8, 6))
+        plt.subplot(2, 1, 1)
+        for i in range(0, testsPerCondition):
+            plt.plot(scoreData[(k * testsPerCondition) + i], label = "Score", color = simple_get_line_color(i), linewidth = 2)
+        if k > 0:
+            plt.ylim(0, 20)
+        plt.title("Population Size: %d; Number of Challengers: %d" % (popSize, conditions[k]))
+        plt.xlabel("Time (in Updates)")
+        plt.ylabel("Average Score")
+        plt.subplot(2, 1, 2)
+        for i in range(0, testsPerCondition):
+            plt.plot(rareData[(k * testsPerCondition) + i], label = "Rare Trait Count", color = simple_get_line_color(i), linewidth = 2)
+
+        plt.ylim(-50, popSize + 50)
+        plt.ylabel("Rare Trait Count")
+        plt.xlabel("Time (in Updates)")
+        plt.savefig("pop%d_numChall%d.png" % (popSize, conditions[k]), dpi = 100)
+
+    plt.show()

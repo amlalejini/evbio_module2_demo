@@ -1,0 +1,9 @@
+{
+  "population_size": 50,
+  "generations": 10,
+  "score_mutation_rate": 0.05,
+  "score_mutation_range": 0.025,
+  "rare_trait_mutation_rate": 0.0001,
+  "num_challenger_conditions": [1, 2, 4, 8],
+  "tests_per_condition": 4
+}

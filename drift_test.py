@@ -108,6 +108,7 @@ if __name__ == "__main__":
     # Plot!
     for k in range(0, len(conditions)):
         plt.figure(figsize = (8, 6))
+        # First plot
         plt.subplot(2, 1, 1)
         for i in range(0, testsPerCondition):
             plt.plot(scoreData[(k * testsPerCondition) + i], label = "Score", color = simple_get_line_color(i), linewidth = 2)
@@ -116,11 +117,12 @@ if __name__ == "__main__":
         plt.title("Population Size: %d; Number of Challengers: %d" % (popSize, conditions[k]))
         plt.xlabel("Time (in Updates)")
         plt.ylabel("Average Score")
+        # Second plot
         plt.subplot(2, 1, 2)
         for i in range(0, testsPerCondition):
             plt.plot(rareData[(k * testsPerCondition) + i], label = "Rare Trait Count", color = simple_get_line_color(i), linewidth = 2)
 
-        plt.ylim(-50, popSize + 50)
+        plt.ylim(-10, popSize + 1)
         plt.ylabel("Rare Trait Count")
         plt.xlabel("Time (in Updates)")
         plt.savefig("pop%d_numChall%d.png" % (popSize, conditions[k]), dpi = 100)
